@@ -1,0 +1,82 @@
+<div class="container">
+    <form name="form" #f="ngForm" novalidate>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="initialInvestment" class="my-2">Initial:  </label><span class="pull-right my-2 text-sm" (click)="setBound()"><i class="fa fa-check-square mr-2"  [ngClass]="[ isChecked ? 'text-success' : 'text-light-gray']"></i>set lower and upper bound</span>
+                    <input type="number" class="form-control" name="initialInvestment" [(ngModel)]="npvData.initialInvestment" #initialInvestment="ngModel" required />
+                    <div *ngIf="f.submitted && initialInvestment.invalid" class="invalid-feedback">
+                        <div *ngIf="initialInvestment.errors.required" class="text-danger text-sm">this field is required</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="discountRateIncrement">Discount Rate {{ isChecked ? 'Increment:' : ':'}}</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="discountRateIncrement" [(ngModel)]="npvData.discountRateIncrement" #discountRateIncrement="ngModel" required />
+                        <span class="input-group-addon">%</span>
+                    </div>
+                    <div *ngIf="f.submitted && discountRateIncrement.invalid" class="invalid-feedback">
+                        <div *ngIf="discountRateIncrement.errors.required" class="text-danger text-sm">this field is required</div>
+                    </div>
+                </div>
+                <div *ngIf="isChecked">
+                    <div class="form-group">
+                        <label for="lowerBound">Lower Bound Discount Rate:</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" name="lowerBound" [(ngModel)]="npvData.lowerBound" #lowerBound="ngModel" required>
+                            <span class="input-group-addon">%</span>
+                        </div>
+                        <div *ngIf="f.submitted && lowerBound.invalid" class="invalid-feedback">
+                            <div *ngIf="lowerBound.errors.required" class="text-danger text-sm">this field is required</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="upperBound">Upper Bound Discount Rate:</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" name="upperBound" [(ngModel)]="npvData.upperBound" #upperBound="ngModel" required>
+                            <span class="input-group-addon">%</span>
+                        </div>
+                        <div *ngIf="f.submitted && upperBound.invalid" class="invalid-feedback">
+                            <div *ngIf="upperBound.errors.required" class="text-danger text-sm">this field is required</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" *ngIf="!isChecked">
+                    <label for="discountRateIncrement">Net Present Value: <h3>{{value | currency}}</h3></label>
+                    <p *ngIf="value < 0">The resulting NPV of the above project is <strong>{{value | currency}}</strong>, which means you will not receive the required return at the end of the project--pursuing the above project may not be an optimal decision.
+                        <br><br>However, even though your projected capital project returned a negative NPV, it may still be worth pursuing. The valuation of real options in a capital budgeting decision could increase the NPV of a project. For example,
+                        research and development projects are risky because the product created is not guaranteed to be successful; however, if it is successful, the potential payoff could be substantial. Alternately, NPV could be negative also because
+                        the required rate of return may be unrealistically high, or the cash flows projected may be too conservative.</p>
+                    <p *ngIf="value > 0">The resulting positive NPV of the above project is <strong>{{value | currency}}</strong>, which indicates that pursuing the above project may be optimal.<br> <br>Remember that even though a project offers a positive NPV, the projected
+                        cash flows are still estimations. The accuracy of these projected figures depends on the skill and experience of the analyst, and likelihood of these cash flows materializing depends on the financial risk associated with the type
+                        of project being pursued. </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <span id="cashflow-label">Cash Flows per year</span> <button class="btn btn-sm btn-success pull-right m-2" id="btn-add-cash-flow" (click)="addCashFlow()" [disabled]="!(npvData.cashFlows.length < 5)"><i class="fa fa-plus-circle mr-2"></i>cash flow</button>
+                <div class="cash-flows-container">
+                    <div class="input-group mb-4" *ngFor="let item of npvData.cashFlows; let i = index">
+                        <span class="input-group-addon">{{item.label}}</span>
+                        <input id="cashFlow" type="number" class="form-control" name="cashFlow" [(ngModel)]="item.value">
+                        <button class="btn input-group-addon" (click)="removeCashFlow(item)" [disabled]="(npvData.cashFlows.length <= 2)"><i class="fa fa-times text-danger"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="rc-button">
+                <div class="form-group pull-right">
+                    <button class="btn btn btn-secondary mr-2" (click)="reset()">Reset</button>
+                    <button class="btn btn-primary" [disabled]="f.invalid" (click)="calculate()">Calculate</button>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="isChecked">
+            <div class="row">
+                <div class="col-md-12">
+                    <chart [type]="'line'" [data]="data" [options]="options"></chart>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
